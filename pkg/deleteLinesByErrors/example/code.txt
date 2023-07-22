@@ -1,0 +1,30 @@
+代码说明：
+	循环从表二的A列读取要删除的行，然后执行删除，注意删除后表的行数-1，下次循环的时候-1(定义变量实现)才能删除正确的行
+
+注意：
+	需要支持宏的表格格式，右键工作表打开宏编辑器（或alt+f11）
+
+-------------------- Code ---------------------------
+Sub deleteRow()
+    Dim i As Integer
+    i = 0
+    For Counter = 2 To 354
+    Set curCell = Sheets("MyE").Cells(Counter, 1)
+        Rows(curCell - i).Delete
+        i = i + 1
+    Next Counter
+    MsgBox "完成"
+End Sub
+
+
+Sub deleteRow()
+    For Each c In Sheets("TWE").Range("A2:A14790").Cells
+        Rows(c.Value).Delete
+    Next
+    MsgBox "完成"
+End Sub
+
+--------------------- Useful Link ------------------------ 
+删除               Rows(7).Delete -- 删除第七行
+循环单元格          https://learn.microsoft.com/zh-cn/office/vba/excel/concepts/cells-and-ranges/looping-through-a-range-of-cells
+MsgBox打印消息      https://www.i-programmer.info/ebooks/automating-excel/1264-getting-started.html?start=1
