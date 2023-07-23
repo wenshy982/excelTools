@@ -3,6 +3,8 @@ package xls
 import (
 	"math"
 	"testing"
+
+	"kit/tools/strx"
 )
 
 const epsilon = 1e-9
@@ -140,7 +142,7 @@ func TestExcel_IntCol(t *testing.T) {
 		if v == "" {
 			t.Error("IntCol() error, got empty string")
 		}
-		if !isInt(v) {
+		if !strx.IsInt(v) {
 			t.Errorf("IntCol() error, got %v", v)
 		}
 	}

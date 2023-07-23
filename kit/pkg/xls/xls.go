@@ -8,22 +8,12 @@ import (
 	"os"
 	"reflect"
 	"strconv"
-	"sync"
 
 	"github.com/xuri/excelize/v2"
 
 	"kit/tools/osx"
+	"kit/tools/strx"
 )
-
-func isInt(s string) bool {
-	_, err := strconv.Atoi(s)
-	return err == nil
-}
-
-func isFloat(s string) bool {
-	_, err := strconv.ParseFloat(s, 64)
-	return err == nil
-}
 
 type XLS struct {
 	Input     string // 输入文件
@@ -82,10 +72,10 @@ func (e *XLS) NewRow(values ...string) []interface{} {
 		switch {
 		case value == "":
 			result[i] = nil
-		case isInt(value):
+		case strx.IsInt(value):
 			intValue, _ := strconv.Atoi(value)
 			result[i] = intValue
-		case isFloat(value):
+		case strx.IsFloat(value):
 			floatValue, _ := strconv.ParseFloat(value, 64)
 			result[i] = floatValue
 		default:
@@ -256,9 +246,4 @@ func hashRow(row []string) string {
 	}
 	hashBytes := hasher.Sum(nil)
 	return base64.StdEncoding.EncodeToString(hashBytes)
-}
-
-// NewWaitGroup 新建 WaitGroup
-func NewWaitGroup() *sync.WaitGroup {
-	return &sync.WaitGroup{}
 }

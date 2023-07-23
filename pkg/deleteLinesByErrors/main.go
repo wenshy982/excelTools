@@ -8,6 +8,7 @@ import (
 	"kit/logger"
 	"kit/pkg/xls"
 	"kit/tools/timex"
+	"kit/tools/waitgroup"
 )
 
 const (
@@ -22,10 +23,10 @@ func main() {
 
 	defer timex.Cost()()
 	var (
-		e     = xls.New()          // Excel 实例
-		iRows [][]string           // 输入文件行
-		col   []string             // 错误文件列
-		wg    = xls.NewWaitGroup() // 等待组
+		e     = xls.New()       // Excel 实例
+		iRows [][]string        // 输入文件行
+		col   []string          // 错误文件列
+		wg    = waitgroup.New() // 等待组
 	)
 	wg.Add(3)
 	go func() {
@@ -40,15 +41,12 @@ func main() {
 	}()
 	go func() {
 		defer wg.Done()
-		// 初始化输出目录
-		e.InitOutputDir()
-		// 拷贝输入文件
-		e.CopyTemplateToOutput()
+		e.InitOutputDir()        // 初始化输出目录
+		e.CopyTemplateToOutput() // 拷贝输入文件
 	}()
 	go func() {
 		defer wg.Done()
-		// 读取errors文件
-		eFile := e.OpenErrors()
+		eFile := e.OpenErrors() // 读取errors文件
 		defer func() { _ = eFile.Close() }()
 		col = e.IntCol(eFile, 1, ErrorsTitleRow)
 		log.Printf("【读取错误文件】读取完成，共 %d 行 \n", len(col))

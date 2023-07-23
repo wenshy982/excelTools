@@ -11,6 +11,7 @@ import (
 	"kit/pkg/xls"
 	"kit/tools/strx"
 	"kit/tools/timex"
+	"kit/tools/waitgroup"
 )
 
 func init() {
@@ -59,12 +60,12 @@ func main() {
 	defer timex.Cost()()
 
 	var (
-		e               = xls.New()          // Excel 实例
-		iRows           [][]string           // 输入文件行
-		wg              = xls.NewWaitGroup() // 等待组
-		inputTitleRow   int                  // 输入文件标题行数
-		iTitle          []string             // 输入文件标题行
-		sellerTypeIndex int                  // Seller Type 列索引
+		e               = xls.New()       // Excel 实例
+		iRows           [][]string        // 输入文件行
+		wg              = waitgroup.New() // 等待组
+		inputTitleRow   int               // 输入文件标题行数
+		iTitle          []string          // 输入文件标题行
+		sellerTypeIndex int               // Seller Type 列索引
 	)
 
 	breakFlag := false

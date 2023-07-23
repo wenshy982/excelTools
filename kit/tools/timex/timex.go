@@ -31,3 +31,11 @@ func Cost() func() {
 		_, _ = fmt.Scanln()
 	}
 }
+
+// ResetTimer 重置定时器
+func ResetTimer(timer *time.Ticker, duration time.Duration) {
+	if timer != nil {
+		timer.Stop() // 停止旧的定时器
+	}
+	timer = time.NewTicker(duration)
+}

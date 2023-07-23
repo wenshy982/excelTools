@@ -6,6 +6,7 @@ import (
 	"kit/logger"
 	"kit/pkg/xls"
 	"kit/tools/timex"
+	"kit/tools/waitgroup"
 )
 
 func init() {
@@ -21,9 +22,9 @@ func main() {
 	defer timex.Cost()()
 
 	var (
-		e     = xls.New()          // Excel 实例
-		iRows [][]string           // 输入文件行
-		wg    = xls.NewWaitGroup() // 等待组
+		e     = xls.New()       // Excel 实例
+		iRows [][]string        // 输入文件行
+		wg    = waitgroup.New() // 等待组
 	)
 	wg.Add(2)
 	go func() {

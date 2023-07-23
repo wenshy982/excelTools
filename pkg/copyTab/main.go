@@ -21,8 +21,8 @@ func main() {
 	var (
 		e     = xls.New() // Excel 实例
 		iRows [][]string  // 输入文件行
-		// wg    = kit.NewWaitGroup() // 等待组
 	)
+
 	e.InitOutputDir()
 	e.CopyInputToOutput()
 
@@ -41,12 +41,10 @@ func main() {
 		e.WriteToRow(oFile, s, e.NewRow(iRows[0]...), 1)
 		e.Save(oFile)
 	}
-	// bar := pb.StartNew(len(kit.SIPSites) * len(iRows))
 	for _, s := range xls.SIPSites {
 		log.Printf("【处理输出文件】正在处理 %s 站点 \n", s)
 		var line = 1
 		for i, iRow := range iRows {
-			// bar.Increment()
 			if i == 0 {
 				continue
 			}
@@ -64,5 +62,4 @@ func main() {
 		e.Save(oFile)
 		log.Printf("【处理输出文件】站点 %s 处理完成，共 %d 行 \n", s, line)
 	}
-	// bar.Finish()
 }
