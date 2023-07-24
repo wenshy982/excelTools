@@ -18,18 +18,18 @@ func TestCalToken(t *testing.T) {
 	}{
 		{
 			name: "test1",
-			args: args{msg: "你好"},
-			want: 2,
+			args: args{msg: `[{"role":"system","content":"0你是人工智能，请你模拟一个知识丰富、高情商、服务热情的秘书来回答问题,回答要专业、完整、思路清晰且有条理，并提供相应的时间和数据。"},{"role":"user","content":"你好"}]`},
+			want: 90,
 		},
 		{
 			name: "test2",
-			args: args{msg: "Hello World"},
-			want: 2,
+			args: args{msg: `{"role":"system","content":"0你是人工智能，请你模拟一个知识丰富、高情商、服务热情的秘书来回答问题,回答要专业、完整、思路清晰且有条理，并提供相应的时间和数据。"},{"role":"user","content":"你好"}`},
+			want: 88,
 		},
 		{
 			name: "test3",
-			args: args{msg: "Hello World, 你好世界"},
-			want: 9,
+			args: args{msg: `""`},
+			want: 1,
 		},
 		{
 			name: "test4",

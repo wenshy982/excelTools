@@ -56,23 +56,9 @@ func CutByToken2(msgData string, max int) (string, int) {
 	return msgData, count + 1
 }
 
-type message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-func (m message) Str() string {
-	return `{"role":"","content":""},` + m.Role + m.Content
-}
-
-func (m message) Str2() string {
-	return `{"role":"","content":""}` + m.Role + m.Content
-}
-
-// FIXME 错误，只有 2 条消息时，token会超过max
 // CutByToken 删除x条以上的数据，并持续压缩消息到合适token大小的数据组,同时返回token数据
 func CutByToken(data string, max int) (string, int) {
-	var messages []message
+	var messages []Message
 	jsonx.UnmarshalString(data, &messages)
 	l := len(messages)
 	if l == 0 || l%2 != 0 { // 对话成对出现，2，4，6......
@@ -80,14 +66,13 @@ func CutByToken(data string, max int) (string, int) {
 	}
 	var i = l - 1                                    // 最后一条消息的索引
 	var str = messages[0].Str() + messages[i].Str2() // 第一条消息和最后一条消息+空数组
-	var curToken = CalToken(str) + 3                 // 3是空数组的token
-	var token = 0
+	var curToken = CalToken(str) + 2                 // 2是空数组的token
 	for ; i >= 0; i -= 2 {
 		if i == 1 { // 新消息只有2条，并且不超过最大token, 则退出
-			break
+			return jsonx.MarshalString(messages), curToken
 		}
-		str = messages[i-1].Str() + messages[i-2].Str() // 最近的两条消息
-		token = CalToken(str)                           // 计算最近的两条消息token
+		str = messages[i-2].Str() + messages[i-1].Str() // 最近的两条消息
+		token := CalToken(str) - 1                      // 计算最近的两条消息token, -1 是去掉""的token
 		if curToken+token > max {                       // 如果超过最大token, 则退出
 			messages = append(messages[:1], messages[i:]...) // 删除第 1 到 i 条消息（1，i 为数组索引）
 			break
@@ -96,4 +81,43 @@ func CutByToken(data string, max int) (string, int) {
 	}
 
 	return jsonx.MarshalString(messages), curToken
+}
+
+func (m *Messages) Cut(max int) (string, int) {
+	l := len(*m)
+	if l == 0 || l%2 != 0 { // 对话成对出现，2，4，6......
+		return jsonx.MarshalString(*m), 0
+	}
+	var i = l - 1                            // 最后一条消息的索引
+	var str = (*m)[0].Str() + (*m)[i].Str2() // 第一条消息和最后一条消息+空数组
+	var curToken = CalToken(str) + 2         // 2是空数组的token
+	for ; i >= 0; i -= 2 {
+		if i == 1 { // 新消息只有2条，并且不超过最大token, 则退出
+			return jsonx.MarshalString(*m), curToken
+		}
+		str = (*m)[i-1].Str() + (*m)[i-2].Str() // 最近的两条消息
+		token := CalToken(str) - 1              // 计算最近的两条消息token, -1 是去掉""的token
+		if curToken+token > max {               // 如果超过最大token, 则退出
+			*m = append((*m)[:1], (*m)[i:]...) // 删除第 1 到 i 条消息（1，i 为数组索引）
+			break
+		}
+		curToken += token // 累加token
+	}
+	return jsonx.MarshalString(*m), curToken
+}
+
+func CheckToken(m Messages, max int) (string, bool) {
+	if m == nil || len(m) == 0 {
+		return "", false
+	}
+	result := jsonx.MarshalString(m)
+	token := CalToken(jsonx.MarshalString(m))
+	if token > max {
+		result, token = m.Cut(max)
+		if token > max || token == 0 {
+			return result, false
+		}
+		return result, true
+	}
+	return result, true
 }
