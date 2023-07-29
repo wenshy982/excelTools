@@ -16,7 +16,7 @@ func init() {
 
 const (
 	templateRowLen int = 3 // 模板文件行数
-	column         int = 7 // 根据第几列分表
+	column         int = 6 // 根据第几列分表
 )
 
 func main() {
@@ -35,6 +35,9 @@ func main() {
 	var wg sync.WaitGroup
 	var noUseLine, createTimes = 0, 0
 	for i, row := range iRows {
+		if row == nil {
+			continue
+		}
 		c := row[column]
 		if c == "" || i < templateRowLen {
 			noUseLine++
@@ -61,12 +64,14 @@ func main() {
 	log.Printf("【创建文件】创建完毕，共 %d 个文件 \n", len(mapFile))
 
 	// 写入数据
-	// var writeTimes = 0
+	var job = make(chan int, 20)
 	for key, value := range mapFile {
 		dst := e.OutputDir + xls.Sep + key + ".xlsx"
 		wg.Add(1)
+		job <- 1
 		go func(key, dst string, rows [][]string) {
 			defer wg.Done()
+			defer func() { <-job }()
 			f := e.Open(dst)
 			defer func() { _ = f.Close() }()
 			fSheet, fRows := e.Sheet(f, 1)
