@@ -15,7 +15,7 @@ func init() {
 }
 
 const (
-	templateRowLen int = 3 // 模板文件行数
+	templateRowLen int = 2 // 模板文件行数
 	column         int = 7 // 根据第几列分表
 )
 
@@ -28,13 +28,17 @@ func main() {
 	iFile := e.OpenInput()
 	defer func() { _ = iFile.Close() }()
 	_, iRows := e.Sheet(iFile, 1)
-	fmt.Printf("【读取输入文件】读取完毕，共 %d 行数据 \n", len(iRows))
+	f2Sheet, i2Rows := e.Sheet(iFile, 4)
+	fmt.Printf("【读取输入文件】读取完毕，sheet1 共 %d 行数据, sheet2 共 %d 行数据 \n", len(iRows), len(i2Rows))
 
 	var mapFile = make(map[string][][]string)
 	// 创建文件
 	var wg sync.WaitGroup
 	var noUseLine, createTimes = 0, 0
 	for i, row := range iRows {
+		if row == nil {
+			continue
+		}
 		c := row[column]
 		if c == "" || i < templateRowLen {
 			noUseLine++
@@ -61,12 +65,14 @@ func main() {
 	log.Printf("【创建文件】创建完毕，共 %d 个文件 \n", len(mapFile))
 
 	// 写入数据
-	// var writeTimes = 0
+	var job = make(chan int, 20)
 	for key, value := range mapFile {
 		dst := e.OutputDir + xls.Sep + key + ".xlsx"
 		wg.Add(1)
+		job <- 1
 		go func(key, dst string, rows [][]string) {
 			defer wg.Done()
+			defer func() { <-job }()
 			f := e.Open(dst)
 			defer func() { _ = f.Close() }()
 			fSheet, fRows := e.Sheet(f, 1)
@@ -74,6 +80,11 @@ func main() {
 			for _, row := range rows {
 				fRowsLen++
 				e.WriteToRow(f, fSheet, e.NewRow(row...), fRowsLen)
+			}
+			for _, row := range i2Rows {
+				if row[0] == key {
+					e.WriteToRow(f, f2Sheet, e.NewRow(row...), 3)
+				}
 			}
 			e.Save(f)
 		}(key, dst, value)

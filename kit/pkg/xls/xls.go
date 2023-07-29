@@ -180,7 +180,8 @@ func (e *XLS) Sheets(f *excelize.File) []string {
 
 // Sheet 获取第几个 sheet
 func (e *XLS) Sheet(f *excelize.File, sheetNum int) (sheet string, rows [][]string) {
-	sheet = e.Sheets(f)[sheetNum-1]
+	sheets := e.Sheets(f)
+	sheet = sheets[sheetNum-1]
 	rows, _ = f.GetRows(sheet)
 	return
 }
